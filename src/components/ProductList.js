@@ -5,11 +5,11 @@ import { AuthContext } from '../context/AuthContext';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-const ArticleList = () => {
+const ProductList = () => {
   const { companyId } = useParams();
   const { auth } = useContext(AuthContext);
 
-  const [articles, setArticles] = useState([]);
+  const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -20,18 +20,18 @@ const ArticleList = () => {
   const [quantity, setQuantity] = useState('');
 
   useEffect(() => {
-    fetchArticles();
+    fetchProducts();
   }, []);
 
   const sendPdfByEmail = async () => {
     // Crear el PDF
     const doc = new jsPDF();
     const headers = [['ID', 'Name', 'Price', 'Quantity']];
-    const data = articles.map((article) => [
-      article.id,
-      article.name,
-      article.price,
-      article.quantity,
+    const data = products.map((product) => [
+      product.id,
+      product.name,
+      product.price,
+      product.quantity,
     ]);
 
     doc.autoTable({
@@ -57,10 +57,10 @@ const ArticleList = () => {
     }
   };
 
-  const fetchArticles = async () => {
+  const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/companies/${companyId}/articles/`, {
+      const response = await fetch(`https://inventario-be.onrender.com/companies/${companyId}/products/`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth.token}`,
@@ -72,7 +72,7 @@ const ArticleList = () => {
       }
 
       const data = await response.json();
-      setArticles(data);
+      setProducts(data);
     } catch (error) {
       console.error('Error al obtener los artículos:', error);
     } finally {
@@ -84,7 +84,7 @@ const ArticleList = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/companies/${companyId}/articles/`, {
+      const response = await fetch(`https://inventario-be.onrender.com/companies/${companyId}/products/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ const ArticleList = () => {
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
       setShowModal(false);
-      fetchArticles();
+      fetchProducts();
     } catch (error) {
       console.error('Error al guardar el artículo:', error);
     } finally {
@@ -111,16 +111,16 @@ const ArticleList = () => {
   const exportToPdf = () => {
     const doc = new jsPDF();
     const tableHeaders = ['ID', 'Name', 'Price', 'Quantity'];
-    const tableData = articles.map(article => [article.id, article.name, article.price, article.quantity]);
+    const tableData = products.map(product => [product.id, product.name, product.price, product.quantity]);
     doc.autoTable({ head: [tableHeaders], body: tableData });
-    doc.save(`Articles-Company-${companyId}.pdf`);
+    doc.save(`Products-Company-${companyId}.pdf`);
   };
 
   return (
     <Container>
-      <h2 className='mt-5 mb-4'>Article List for Company {companyId}</h2>
+      <h2 className='mt-5 mb-4'>Products List for Company {companyId}</h2>
       <Button className='mb-4' onClick={() => setShowModal(true)}>
-        Add Article
+        Add Product
       </Button>{' '}
       <Button className='mb-4' onClick={exportToPdf}>
         Export to PDF
@@ -148,7 +148,7 @@ const ArticleList = () => {
           Artículo agregado exitosamente.
         </Alert>
       )}
-      {articles.length ? (
+      {products.length ? (
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -159,23 +159,23 @@ const ArticleList = () => {
             </tr>
           </thead>
           <tbody>
-            {articles.map((article) => (
-              <tr key={article.id}>
-                <td>{article.id}</td>
-                <td>{article.name}</td>
-                <td>{article.price}</td>
-                <td>{article.quantity}</td>
+            {products.map((product) => (
+              <tr key={product.id}>
+                <td>{product.id}</td>
+                <td>{product.name}</td>
+                <td>{product.price}</td>
+                <td>{product.quantity}</td>
               </tr>
             ))}
           </tbody>
         </Table>
       ) : (
-        <p>No articles found</p>
+        <p>No products found</p>
       )}
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Add Article</Modal.Title>
+          <Modal.Title>Add Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
@@ -218,4 +218,4 @@ const ArticleList = () => {
   );
 };
 
-export default ArticleList;
+export default ProductList;

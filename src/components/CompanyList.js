@@ -31,7 +31,7 @@ const CompanyList = () => {
   const fetchCompanies = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/companies/', {
+      const response = await fetch('https://inventario-be.onrender.com/companies/', {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${auth.token}`,
@@ -57,8 +57,8 @@ const CompanyList = () => {
     setIsLoading(true);
     try {
       const url = editingCompany
-        ? `http://localhost:3000/companies/${editingCompany}`
-        : 'http://localhost:3000/companies/';
+        ? `https://inventario-be.onrender.com/companies/${editingCompany}`
+        : 'https://inventario-be.onrender.com/companies/';
       const method = editingCompany ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -98,7 +98,7 @@ const CompanyList = () => {
   const deleteCompany = async (companyId) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/companies/${companyId}`, {
+      const response = await fetch(`https://inventario-be.onrender.com/companies/${companyId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -119,8 +119,8 @@ const CompanyList = () => {
       showAlert('error', 'Error al eliminar la empresa');
     }
   }
-  const viewArticles = (companyId) => {
-    navigate(`/articles/${companyId}`);
+  const viewProducts = (companyId) => {
+    navigate(`/products/${companyId}`);
   };
 
   const closeModal = () => {
@@ -169,7 +169,7 @@ const CompanyList = () => {
               <td>{company.phone}</td>
               {auth.user.role === 'administrador' && (
                 <td className='text-center'>
-                  <Button onClick={() => viewArticles(company.id)}>View</Button>{' '}
+                  <Button onClick={() => viewProducts(company.id)}>View</Button>{' '}
                   <Button onClick={() => editCompany(company)}>Edit</Button>{' '}
                   <Button onClick={() => deleteCompany(company.id)}>Delete</Button>
                 </td>
