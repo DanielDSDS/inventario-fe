@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import emailjs from "emailjs-com";
 
 const ProductList = () => {
   const { companyId } = useParams();
@@ -18,6 +19,10 @@ const ProductList = () => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailModalVisible, setEmailModalVisible] = useState(false);
+  const [emailToSend, setEmailToSend] = useState("");
+
 
   useEffect(() => {
     fetchProducts();
@@ -43,19 +48,31 @@ const ProductList = () => {
 
     // Configurar los datos para enviar el correo
     const emailData = {
-      from_email: 'ddimela9no@gmail.com',
-      to_email: 'ddimela9no@gmail.com',
+      from_email: "ddimela9no@gmail.com",
+      to_email: emailToSend,
       pdf_data: pdfBase64,
     };
 
     try {
       // Enviar el correo
-      await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', emailData, 'YOUR_USER_ID');
+      await emailjs.send('service_yc5ew7r', 'template_zo8yu8m', emailData, '3UQyJr1ngJ7wj0-87');
       console.log('Email sent successfully');
+      setEmailModalVisible(false);
+      setEmailToSend("");
     } catch (error) {
       console.error('Error sending email:', error);
     }
   };
+
+  const handleEmailInputChange = (event) => {
+    setEmailToSend(event.target.value);
+  };
+
+  const handleEmailSubmit = (event) => {
+    event.preventDefault();
+    sendPdfByEmail();
+  };
+
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -118,61 +135,68 @@ const ProductList = () => {
 
   return (
     <Container>
-      <h2 className='mt-5 mb-4'>Products List for Company {companyId}</h2>
+      <h1>Product List</h1>
       <Button className='mb-4' onClick={() => setShowModal(true)}>
         Add Product
       </Button>{' '}
       <Button className='mb-4' onClick={exportToPdf}>
         Export to PDF
       </Button>{' '}
-      <Button className='mb-4' onClick={sendPdfByEmail}>
+      <Button className='mb-4' onClick={() => setEmailModalVisible(true)}>
         Send PDF by Email
       </Button>
-      {error && (
-        <Alert variant='danger' onClose={() => setError(null)} dismissible>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert variant='success' onClose={() => setSuccess(null)} dismissible>
-          {success}
-        </Alert>
-      )}
       {isLoading && (
-        <div className="text-center my-3">
-          <Spinner animation="border" />
-        </div>
+        <Spinner animation='border' role='status'>
+          <span className='visually-hidden'>Loading...</span>
+        </Spinner>
       )}
       {showSuccessAlert && (
-        <Alert variant="success" onClose={() => setShowSuccessAlert(false)} dismissible>
-          Artículo agregado exitosamente.
+        <Alert variant='success'>
+          Product saved successfully!
         </Alert>
       )}
-      {products.length ? (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Quantity</th>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((product) => (
+            <tr key={product.id}>
+              <td>{product.id}</td>
+              <td>{product.name}</td>
+              <td>{product.price}</td>
+              <td>{product.quantity}</td>
             </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td>{product.id}</td>
-                <td>{product.name}</td>
-                <td>{product.price}</td>
-                <td>{product.quantity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      ) : (
-        <p>No products found</p>
-      )}
-
+          ))}
+        </tbody>
+      </Table>
+      <Modal show={emailModalVisible} onHide={() => setEmailModalVisible(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Send PDF by Email</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEmailSubmit}>
+            <Form.Group controlId="email">
+              <Form.Label>Email Address</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email address"
+                value={emailToSend}
+                onChange={handleEmailInputChange}
+                required
+              />
+            </Form.Group>
+            <Button className='mt-4' variant="primary" type="submit">
+              Send
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Add Product</Modal.Title>
@@ -183,7 +207,7 @@ const ProductList = () => {
               <Form.Label>Name</Form.Label>
               <Form.Control
                 type='text'
-                placeholder='Enter Name'
+                placeholder='Enter product name'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -192,8 +216,7 @@ const ProductList = () => {
               <Form.Label>Price</Form.Label>
               <Form.Control
                 type='number'
-                step='0.01'
-                placeholder='Enter Price'
+                placeholder='Enter product price'
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
@@ -202,19 +225,18 @@ const ProductList = () => {
               <Form.Label>Quantity</Form.Label>
               <Form.Control
                 type='number'
-                placeholder='Enter Quantity'
+                placeholder='Enter product quantity'
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
               />
             </Form.Group>
-
             <Button variant='primary' type='submit'>
               Save
             </Button>
           </Form>
         </Modal.Body>
-      </Modal >
-    </Container >
+      </Modal>
+    </Container>
   );
 };
 
