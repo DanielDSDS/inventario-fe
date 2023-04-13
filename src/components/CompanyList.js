@@ -156,7 +156,9 @@ const CompanyList = () => {
             <th>Name</th>
             <th>Address</th>
             <th>Phone</th>
-            <th>Actions</th>
+            {
+              auth.user.role === 'administrador' && (<th>Actions</th>)
+            }
           </tr>
         </thead>
         <tbody>
